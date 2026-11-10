@@ -14,21 +14,36 @@ function divide(a, b){
     return a / b;
 }
 
-function operate(operator, number1, number2){
-    switch(operator){
+function operate(op){
+    switch(op.operator){
         case '+':
-            return add(number1, number2);
+            return add(op.number1, op.number2);
         case '-':
-            return subtract(number1, number2);
+            return subtract(op.number1, op.number2);
         case '*':
-            return multiply(number1, number2);
+            return multiply(op.number1, op.number2);
         case '/':
-            return divide(number1, number2);
+            return divide(op.number1, op.number2);
         default:
             console.log('unexpected error');
     }
 }
 
-let number1;
-let operator;
-let number2;
+function modifyOperation(operationString, newChar){
+    operationString += newChar;
+    if(operationString.length === 3){
+        const chars = operationString.split('');
+        const operation = {
+            number1: parseInt(chars[0]),
+            operator: chars[1],
+            number2: parseInt(chars[2]),
+        };
+        console.log(operation);
+    }
+    return operationString;
+}
+
+let operationString = '';
+const buttons = document.getElementsByClassName('btn');
+for(let button of buttons) button.onclick = () => operationString = modifyOperation(operationString, button.textContent);
+
