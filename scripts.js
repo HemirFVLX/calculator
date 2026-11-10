@@ -14,7 +14,7 @@ function divide(a, b){
     return a / b;
 }
 
-function operate(op){
+function makeOperation(op){
     switch(op.operator){
         case '+':
             return add(op.number1, op.number2);
@@ -30,16 +30,31 @@ function operate(op){
 }
 
 function modifyOperation(operationString, newChar){
-    operationString += newChar;
-    if(operationString.length === 3){
-        const chars = operationString.split('');
+    if(newChar === 'C') return '';
+
+    const regex = /^[0-9]+[+-/*//]+[0-9]+$/;
+    const ops = '+-*/=';
+
+    if(regex.test(operationString) && ops.includes(newChar)){
+        const op = operationString.split('').filter((x) => Number.isNaN(parseInt(x))).join();
+        const chars = operationString.split(`${op}`);
         const operation = {
             number1: parseInt(chars[0]),
-            operator: chars[1],
-            number2: parseInt(chars[2]),
+            operator: op,
+            number2: parseInt(chars[1]),
         };
         console.log(operation);
+
+        const result = makeOperation(operation);
+        operationString = result.toString();
+        
+        if(newChar === '='){
+            console.log(operationString);
+            return operationString;
+        } 
     }
+    operationString += newChar;
+    console.log(operationString);
     return operationString;
 }
 
