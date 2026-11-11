@@ -16,7 +16,7 @@ function divide(a, b){
     return a / b;
 }
 
-function makeOperation(op){
+function operate(op){
     switch(op.operator){
         case '+':
             return add(op.number1, op.number2);
@@ -31,8 +31,37 @@ function makeOperation(op){
     }
 }
 
+function displayResult(chars){
+    const onlyNumbers = /^[0-9]+$/;
+    const operatorAtEnd = /^[0-9]+[+-/*//]+$/;
+    const numbersAfterOperator = /^[0-9]+[+-/*//]+[0-9]+$/;
+
+    const screenElement = document.querySelector('.screen');
+    let resultString = '';
+
+    if(onlyNumbers.test(chars)){
+        resultString = chars;
+    } else if (operatorAtEnd.test(chars)){
+        resultString = chars.split('');
+        resultString.pop();
+        resultString = resultString.join('');
+    } else if(numbersAfterOperator.test(chars)){
+        let charShifted;
+        resultString = chars.split('');
+        do {
+            charShifted = resultString.shift();
+        } while(!Number.isNaN(parseInt(charShifted)));
+        resultString = resultString.join('');
+    }
+
+    screenElement.textContent = resultString;
+}
+
 function modifyOperation(operationString, newChar){
-    if(newChar === 'C') return '';
+    if(newChar === 'C') {
+        displayResult('0');
+        return '';
+    }
 
     if(previousCharEqual && !Number.isNaN(parseInt(newChar))) operationString = '';
     previousCharEqual = false;
@@ -42,7 +71,7 @@ function modifyOperation(operationString, newChar){
 
     if(regex.test(operationString) && ops.includes(newChar)){
         const op = operationString.split('').filter((x) => Number.isNaN(parseInt(x))).join();
-        const chars = operationString.split(`${op}`);
+        const chars = operationString.split(op);
         const operation = {
             number1: parseInt(chars[0]),
             operator: op,
@@ -50,21 +79,26 @@ function modifyOperation(operationString, newChar){
         };
         console.log(operation);
 
-        const result = makeOperation(operation);
+        const result = operate(operation);
         operationString = result.toString();
         
         if(newChar === '='){
             previousCharEqual = true;
+            displayResult(operationString);
             console.log(operationString);
             return operationString;
         } 
     }
     operationString += newChar;
+    displayResult(operationString);
     console.log(operationString);
     return operationString;
 }
 
 let operationString = '';
 const buttons = document.getElementsByClassName('btn');
-for(let button of buttons) button.onclick = () => operationString = modifyOperation(operationString, button.textContent);
+for(let button of buttons) button.onclick = () => {
+    operationString = modifyOperation(operationString, button.textContent);
+    //displayResult(button.textContent);
+};
 
