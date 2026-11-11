@@ -107,7 +107,11 @@ function modifyOperation(operationString, newChar){
     if(operationString !== '0'){
         operationString += newChar;
     } else {
-        operationString = newChar;
+        if(Number.isNaN(parseInt(newChar))){
+            operationString += newChar;
+        } else {
+            operationString = newChar;
+        }
     }
     displayResult(operationString);
     //console.log(operationString);
