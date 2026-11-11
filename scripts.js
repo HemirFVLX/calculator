@@ -1,3 +1,5 @@
+let previousCharEqual = false;
+
 function add(a, b){
     return a + b;
 }
@@ -32,6 +34,9 @@ function makeOperation(op){
 function modifyOperation(operationString, newChar){
     if(newChar === 'C') return '';
 
+    if(previousCharEqual && !Number.isNaN(parseInt(newChar))) operationString = '';
+    previousCharEqual = false;
+
     const regex = /^[0-9]+[+-/*//]+[0-9]+$/;
     const ops = '+-*/=';
 
@@ -49,6 +54,7 @@ function modifyOperation(operationString, newChar){
         operationString = result.toString();
         
         if(newChar === '='){
+            previousCharEqual = true;
             console.log(operationString);
             return operationString;
         } 
