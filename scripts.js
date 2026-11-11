@@ -1,4 +1,5 @@
 let previousCharEqual = false;
+let operation = {};
 
 function add(a, b){
     return a + b;
@@ -13,7 +14,11 @@ function multiply(a, b){
 }
 
 function divide(a, b){
-    return a / b;
+    if(b === 0){
+        if(a === 0) return 'Undefined';
+        return 'Error';
+    }
+    return Math.floor(a / b);
 }
 
 function operate(op){
@@ -39,9 +44,7 @@ function displayResult(chars){
     const screenElement = document.querySelector('.screen');
     let resultString = '';
 
-    if(onlyNumbers.test(chars)){
-        resultString = chars;
-    } else if (operatorAtEnd.test(chars)){
+    if (operatorAtEnd.test(chars)){
         resultString = chars.split('');
         resultString.pop();
         resultString = resultString.join('');
@@ -52,6 +55,8 @@ function displayResult(chars){
             charShifted = resultString.shift();
         } while(!Number.isNaN(parseInt(charShifted)));
         resultString = resultString.join('');
+    } else {
+        resultString = chars;
     }
 
     screenElement.textContent = resultString;
@@ -60,10 +65,21 @@ function displayResult(chars){
 function modifyOperation(operationString, newChar){
     if(newChar === 'C') {
         displayResult('0');
-        return '';
+        return '0';
     }
 
-    if(previousCharEqual && !Number.isNaN(parseInt(newChar))) operationString = '';
+    if(previousCharEqual){
+        if(!Number.isNaN(parseInt(newChar))){
+            operationString = '';
+        } else if(newChar === '='){
+            operation.number1 = parseInt(operationString);
+            operationString = operate(operation).toString();
+            previousCharEqual = true;
+            displayResult(operationString);
+            //console.log(operationString);
+            return operationString;
+        }
+    } 
     previousCharEqual = false;
 
     const regex = /^[0-9]+[+-/*//]+[0-9]+$/;
@@ -72,26 +88,29 @@ function modifyOperation(operationString, newChar){
     if(regex.test(operationString) && ops.includes(newChar)){
         const op = operationString.split('').filter((x) => Number.isNaN(parseInt(x))).join();
         const chars = operationString.split(op);
-        const operation = {
-            number1: parseInt(chars[0]),
-            operator: op,
-            number2: parseInt(chars[1]),
-        };
-        console.log(operation);
 
-        const result = operate(operation);
-        operationString = result.toString();
+        operation.number1 = parseInt(chars[0]);
+        operation.operator = op;
+        operation.number2 = parseInt(chars[1]);
+
+        //console.log(operation);
+
+        operationString = operate(operation).toString();
         
         if(newChar === '='){
             previousCharEqual = true;
             displayResult(operationString);
-            console.log(operationString);
+            //console.log(operationString);
             return operationString;
         } 
     }
-    operationString += newChar;
+    if(operationString !== '0'){
+        operationString += newChar;
+    } else {
+        operationString = newChar;
+    }
     displayResult(operationString);
-    console.log(operationString);
+    //console.log(operationString);
     return operationString;
 }
 
@@ -99,6 +118,5 @@ let operationString = '';
 const buttons = document.getElementsByClassName('btn');
 for(let button of buttons) button.onclick = () => {
     operationString = modifyOperation(operationString, button.textContent);
-    //displayResult(button.textContent);
 };
 
