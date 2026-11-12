@@ -1,3 +1,8 @@
+const regex = /^[0-9]+[+-/*//]+[0-9]+$/;
+const onlyNumbers = /^[0-9]+$/;
+const operatorAtEnd = /^[0-9]+[+-/*//]+$/;
+const ops = '+-*/';
+
 let previousCharEqual = false;
 let operation = {};
 
@@ -37,10 +42,6 @@ function operate(op){
 }
 
 function displayResult(chars){
-    const onlyNumbers = /^[0-9]+$/;
-    const operatorAtEnd = /^[0-9]+[+-/*//]+$/;
-    const numbersAfterOperator = /^[0-9]+[+-/*//]+[0-9]+$/;
-
     const screenElement = document.querySelector('.screen');
     let resultString = '';
 
@@ -48,7 +49,7 @@ function displayResult(chars){
         resultString = chars.split('');
         resultString.pop();
         resultString = resultString.join('');
-    } else if(numbersAfterOperator.test(chars)){
+    } else if(regex.test(chars)){
         let charShifted;
         resultString = chars.split('');
         do {
@@ -64,6 +65,8 @@ function displayResult(chars){
 
 function modifyOperation(operationString, newChar){
     if(newChar === 'C') {
+        previousCharEqual = false;
+        operation = {};
         displayResult('0');
         return '0';
     }
@@ -82,10 +85,30 @@ function modifyOperation(operationString, newChar){
     } 
     previousCharEqual = false;
 
-    const regex = /^[0-9]+[+-/*//]+[0-9]+$/;
-    const ops = '+-*/=';
+    if(newChar === '='){
+        if(onlyNumbers.test(operationString)){
+            return operationString;
+        } else if(operatorAtEnd.test(operationString)){
+            const arr = operationString.split('');
+            operation.operator = arr.pop();
+            operationString = arr.join('');
+            operation.number1 = parseInt(operationString);
+            operation.number2 = parseInt(operationString);
 
-    if(regex.test(operationString) && ops.includes(newChar)){
+            operationString = operate(operation).toString();
+
+            previousCharEqual = true;
+            displayResult(operationString);
+            return operationString;
+        }
+    }
+
+    if(operatorAtEnd.test(operationString) && ops.includes(newChar)){
+        operationString = operationString.slice(0, operationString.length - 1) + newChar;
+        return operationString;
+    }
+
+    if(regex.test(operationString) && (ops.includes(newChar) || newChar === '=')){
         const op = operationString.split('').filter((x) => Number.isNaN(parseInt(x))).join();
         const chars = operationString.split(op);
 
@@ -118,7 +141,7 @@ function modifyOperation(operationString, newChar){
     return operationString;
 }
 
-let operationString = '';
+let operationString = '0';
 const buttons = document.getElementsByClassName('btn');
 for(let button of buttons) button.onclick = () => {
     operationString = modifyOperation(operationString, button.textContent);
